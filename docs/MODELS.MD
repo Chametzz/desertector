@@ -37,7 +37,7 @@ Carreras universitarias.
 
 ---
 
-### 4. `persons`
+### 4. `people`
 Datos personales y demográficos. Cada persona está vinculada a un usuario.
 
 | Campo | Tipo | Límite | Descripción |
@@ -62,12 +62,12 @@ Define los roles adicionales de una persona (estudiante, docente, tutor). Una pe
 | Campo | Tipo | Límite | Descripción |
 |-------|------|--------|-------------|
 | `id` | INT | -- | Identificador autoincrementable (PK) |
-| `person_id` | INT (FK) | -- | Referencia a `persons.id` |
+| `person_id` | INT (FK) | -- | Referencia a `people.id` |
 | `profile_type` | ENUM('student','teacher','tutor') | -- | Tipo de perfil |
 | `created_at` | TIMESTAMP | -- | Fecha de registro |
 | `updated_at` | TIMESTAMP | -- | Fecha de actualización |
 
-**FK**: `person_id` → `persons(id)`
+**FK**: `person_id` → `people(id)`
 
 ---
 
@@ -77,7 +77,7 @@ Perfil específico de estudiante.
 | Campo | Tipo | Límite | Descripción |
 |-------|------|--------|-------------|
 | `id` | INT | -- | Identificador autoincrementable (PK) |
-| `person_id` | INT (FK) | -- | Referencia a `persons.id` |
+| `person_id` | INT (FK) | -- | Referencia a `people.id` |
 | `control_number` | VARCHAR(20) | 20 | Número de control del alumno |
 | `major_id` | INT (FK) | -- | Carrera que cursa (`majors.id`) |
 | `gpa` | DECIMAL(5,2) | 0.00 – 100.00 | Promedio general |
@@ -88,7 +88,7 @@ Perfil específico de estudiante.
 | `updated_at` | TIMESTAMP | -- | Fecha de actualización |
 
 **FK**:
-- `person_id` → `persons(id)`
+- `person_id` → `people(id)`
 - `major_id` → `majors(id)`
 - `tutor_id` → `tutors(id)`
 
@@ -100,12 +100,12 @@ Perfil específico de docente.
 | Campo | Tipo | Límite | Descripción |
 |-------|------|--------|-------------|
 | `id` | INT | -- | Identificador autoincrementable (PK) |
-| `person_id` | INT (FK) | -- | Referencia a `persons.id` |
+| `person_id` | INT (FK) | -- | Referencia a `people.id` |
 | `is_active` | BOOLEAN | -- | Registro activo / inactivo |
 | `created_at` | TIMESTAMP | -- | Fecha de registro |
 | `updated_at` | TIMESTAMP | -- | Fecha de actualización |
 
-**FK**: `person_id` → `persons(id)`
+**FK**: `person_id` → `people(id)`
 
 ---
 
@@ -115,12 +115,12 @@ Perfil específico de tutor (acompañante del estudiante).
 | Campo | Tipo | Límite | Descripción |
 |-------|------|--------|-------------|
 | `id` | INT | -- | Identificador autoincrementable (PK) |
-| `person_id` | INT (FK) | -- | Referencia a `persons.id` |
+| `person_id` | INT (FK) | -- | Referencia a `people.id` |
 | `is_active` | BOOLEAN | -- | Registro activo / inactivo |
 | `created_at` | TIMESTAMP | -- | Fecha de registro |
 | `updated_at` | TIMESTAMP | -- | Fecha de actualización |
 
-**FK**: `person_id` → `persons(id)`
+**FK**: `person_id` → `people(id)`
 
 ---
 
@@ -233,12 +233,12 @@ Encuestas aplicables para medir factores de deserción.
 | `id` | INT | -- | Identificador autoincrementable (PK) |
 | `title` | VARCHAR(150) | 150 | Título de la encuesta |
 | `description` | TEXT | -- | Descripción de la encuesta |
-| `created_by` | INT (FK) | -- | Persona que crea la encuesta (`persons.id`) |
+| `created_by` | INT (FK) | -- | Persona que crea la encuesta (`people.id`) |
 | `is_public` | BOOLEAN | -- | Si es pública, otros pueden aplicarla |
 | `created_at` | TIMESTAMP | -- (nullable) | Fecha de registro |
 | `updated_at` | TIMESTAMP | -- | Fecha de actualización |
 
-**FK**: `created_by` → `persons(id)`
+**FK**: `created_by` → `people(id)`
 
 ---
 
@@ -292,18 +292,18 @@ Asignación de una encuesta para ser respondida por un grupo de estudiantes.
 
 ---
 
-### 18. `survey_assignments_persons`
+### 18. `survey_assignment_people`
 Relación muchos a muchos entre asignaciones de encuesta y personas.
 
 | Campo | Tipo | Límite | Descripción |
 |-------|------|--------|-------------|
 | `id` | INT | -- | Identificador autoincrementable (PK) |
-| `survey_assignments_id` | INT (FK) | -- | Referencia a `survey_assignments.id` |
-| `person_id` | INT (FK) | -- | Persona asignada (`persons.id`) |
+| `survey_assignment_id` | INT (FK) | -- | Referencia a `survey_assignments.id` |
+| `person_id` | INT (FK) | -- | Persona asignada (`people.id`) |
 
 **FK**:
 - `survey_assignments_id` → `survey_assignments(id)`
-- `person_id` → `persons(id)`
+- `person_id` → `people(id)`
 
 ---
 
@@ -314,7 +314,7 @@ Registro de cada intento de respuesta a una asignación de encuesta.
 |-------|------|--------|-------------|
 | `id` | INT | -- | Identificador autoincrementable (PK) |
 | `survey_assignments_id` | INT (FK) | -- | Asignación respondida (`survey_assignments.id`) |
-| `person_id` | INT (FK) | -- | Persona que responde (`persons.id`) |
+| `person_id` | INT (FK) | -- | Persona que responde (`people.id`) |
 | `attempt_number` | INT | -- | Número de intento (1,2,…) |
 | `completed_at` | TIMESTAMP | -- (nullable) | Momento de finalización |
 | `created_at` | TIMESTAMP | -- | Fecha de registro |
@@ -322,7 +322,7 @@ Registro de cada intento de respuesta a una asignación de encuesta.
 
 **FK**:
 - `survey_assignments_id` → `survey_assignments(id)`
-- `person_id` → `persons(id)`
+- `person_id` → `people(id)`
 
 ---
 
@@ -356,7 +356,7 @@ erDiagram
         varchar email
         varchar password_hash
     }
-    persons {
+    people {
         int id PK
         int user_id FK
         varchar first_name
@@ -497,9 +497,9 @@ erDiagram
         timestamp created_at
         timestamp updated_at
     }
-    survey_assignments_persons {
+    survey_assignment_people {
         int id PK
-        int survey_assignments_id FK
+        int survey_assignment_id FK
         int person_id FK
     }
     survey_responses {
@@ -523,11 +523,11 @@ erDiagram
     }
 
     %% Relaciones
-    users ||--o| persons : "tiene"
-    persons ||--o{ person_profiles : "tiene"
-    persons ||--o| students : "puede ser"
-    persons ||--o| teachers : "puede ser"
-    persons ||--o| tutors : "puede ser"
+    users ||--o| people : "tiene"
+    people ||--o{ person_profiles : "tiene"
+    people ||--o| students : "puede ser"
+    people ||--o| teachers : "puede ser"
+    people ||--o| tutors : "puede ser"
     majors ||--o{ students : "cursa"
     tutors ||--o{ students : "tutor asignado"
     students ||--o{ student_absences : "tiene"
@@ -543,14 +543,14 @@ erDiagram
     tutors ||--o{ student_observations : "escribe (opc)"
     students ||--o{ student_supports : "recibe"
     tutors ||--o{ student_supports : "ejecuta"
-    persons ||--o{ surveys : "crea (created_by)"
+    people ||--o{ surveys : "crea (created_by)"
     surveys ||--o{ survey_questions : "contiene"
     survey_questions ||--o{ question_options : "ofrece"
     surveys ||--o{ survey_assignments : "asigna"
-    survey_assignments ||--o{ survey_assignments_persons : "tiene"
-    students ||--o{ survey_assignments_persons : "recibe"
+    survey_assignments ||--o{ survey_assignment_people : "tiene"
+    students ||--o{ survey_assignment_people : "recibe"
     survey_assignments ||--o{ survey_responses : "genera"
-    persons ||--o{ survey_responses : "responde"
+    people ||--o{ survey_responses : "responde"
     survey_responses ||--o{ survey_answers : "detalla"
     survey_questions ||--o{ survey_answers : "contesta"
     question_options ||--o{ survey_answers : "opcion_elegida (opc)"
