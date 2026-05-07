@@ -48,7 +48,7 @@ Datos personales y demográficos. Cada persona está vinculada a un usuario.
 | `last_name` | VARCHAR(50) | 50 | Apellido paterno (o único) |
 | `second_last_name` | VARCHAR(50) | 50 (nullable) | Apellido materno (opcional) |
 | `birth_date` | DATE | -- | Fecha de nacimiento (YYYY-MM-DD) |
-| `gender` | ENUM('M','F','O') | -- | Género: Masculino, Femenino, Otro |
+| `gender` | ENUM('m','f','o') | -- | Género: Masculino, Femenino, Otro |
 | `created_at` | TIMESTAMP | -- | Fecha de registro |
 | `updated_at` | TIMESTAMP | -- | Fecha de actualización |
 
@@ -63,7 +63,7 @@ Define los roles adicionales de una persona (estudiante, docente, tutor). Una pe
 |-------|------|--------|-------------|
 | `id` | INT | -- | Identificador autoincrementable (PK) |
 | `person_id` | INT (FK) | -- | Referencia a `people.id` |
-| `profile_type` | ENUM('student','teacher','tutor') | -- | Tipo de perfil |
+| `profile_type` | ENUM('admin', 'student','teacher','tutor') | -- | Tipo de perfil |
 | `created_at` | TIMESTAMP | -- | Fecha de registro |
 | `updated_at` | TIMESTAMP | -- | Fecha de actualización |
 
@@ -282,6 +282,7 @@ Asignación de una encuesta para ser respondida por un grupo de estudiantes.
 |-------|------|--------|-------------|
 | `id` | INT | -- | Identificador autoincrementable (PK) |
 | `name` | VARCHAR(255) | 255 | Nombre de la asignación |
+| `description` | VARCHAR(255) | 255 | Descripción de la asignación |
 | `survey_id` | INT (FK) | -- | Encuesta asignada (`surveys.id`) |
 | `max_responses` | INT | 1 – 10 | Límite de respuestas por estudiante |
 | `due_date` | TIMESTAMP | -- (nullable) | Fecha de vencimiento |
@@ -491,6 +492,7 @@ erDiagram
     survey_assignments {
         int id PK
         varchar name
+        text description
         int survey_id FK
         int max_responses
         timestamp due_date

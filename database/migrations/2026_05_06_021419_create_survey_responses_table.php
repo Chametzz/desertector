@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('survey_responses', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('survey_assignments_id')->constrained('survey_assignments')->onDelete('cascade');
+            $table->foreignId('person_id')->constrained('people')->onDelete('cascade');
+            $table->integer('attempt_number');
+            $table->timestamp('completed_at')->nullable();
             $table->timestamps();
         });
     }

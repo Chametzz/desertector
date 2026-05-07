@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('surveys', function (Blueprint $table) {
             $table->id();
+            $table->string('title', 150);
+            $table->text('description');
+            $table->foreignId('created_by')->constrained('people');
+            $table->boolean('is_public')->default(false);
             $table->timestamps();
         });
     }

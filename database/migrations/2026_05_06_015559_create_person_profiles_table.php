@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('person_profiles', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('person_id')->constrained('people')->onDelete('cascade');
+            $table->enum('profile_type', ['admin', 'student', 'teacher', 'tutor']);
             $table->timestamps();
         });
     }

@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('survey_questions', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('survey_id')->constrained()->onDelete('cascade');
+            $table->text('title');
+            $table->enum('question_type', ['single_choice', 'multiple_choice', 'short_text', 'long_text', 'number']);
+            $table->integer('display_order');
             $table->timestamps();
         });
     }

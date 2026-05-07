@@ -13,7 +13,9 @@ return new class extends Migration
     {
         Schema::create('survey_assignment_people', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->foreignId('survey_assignment_id')->constrained()->onDelete('cascade');
+            $table->foreignId('person_id')->constrained('people')->onDelete('cascade');
+            // No es necesario agregar timestamps a menos que se requiera
         });
     }
 

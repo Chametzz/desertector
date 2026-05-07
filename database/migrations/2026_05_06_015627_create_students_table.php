@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('students', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('person_id')->constrained('people')->onDelete('cascade');
+            $table->string('control_number', 20)->unique();
+            $table->foreignId('major_id')->constrained();
+            $table->decimal('gpa', 5, 2);
+            $table->foreignId('tutor_id')->nullable()->constrained('tutors');
+            $table->enum('status', ['enrolled', 'on_leave', 'graduated', 'dropped_out']);
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

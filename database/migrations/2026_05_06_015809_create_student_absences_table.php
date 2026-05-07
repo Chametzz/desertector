@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('student_absences', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('student_id')->constrained();
+            $table->foreignId('teacher_id')->constrained();
+            $table->foreignId('subject_id')->constrained();
+            $table->boolean('is_justified')->default(false);
+            $table->text('justification_reason')->nullable();
+            $table->date('date');
             $table->timestamps();
         });
     }
