@@ -30,9 +30,9 @@ class Person extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function profiles()
+    public function personProfiles()
     {
-        return $this->hasMany(PersonProfile::class);
+        return $this->hasMany(PersonProfile::class, 'person_id');
     }
 
     public function student()
@@ -66,5 +66,11 @@ class Person extends Model
     public function surveyAssignments()
     {
         return $this->belongsToMany(SurveyAssignment::class, 'survey_assignment_people', 'person_id', 'survey_assignment_id');
+    }
+
+    //Nombre completo
+    public function getFullNameAttribute(): string
+    {
+        return trim("{$this->first_name} {$this->last_name} {$this->second_last_name}");
     }
 }
