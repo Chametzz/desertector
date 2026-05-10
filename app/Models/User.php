@@ -51,8 +51,92 @@ class User extends Authenticatable
      */
     public function person(): HasOne
     {
-        // Esto le dice a Laravel que busque en la tabla 'people' 
+        // Esto le dice a Laravel que busque en la tabla 'people'
         // un campo 'user_id' que coincida con el ID de este usuario.
         return $this->hasOne(Person::class);
+    }
+
+    /**
+     * Acceso directo al perfil de estudiante
+     */
+    public function student(): ?Student
+    {
+        return $this->person?->student;
+    }
+
+    /**
+     * Acceso directo al perfil de docente
+     */
+    public function teacher(): ?Teacher
+    {
+        return $this->person?->teacher;
+    }
+
+    /**
+     * Acceso directo al perfil de tutor
+     */
+    public function tutor(): ?Tutor
+    {
+        return $this->person?->tutor;
+    }
+
+    /**
+     * Obtener todos los perfiles de la persona
+     */
+    public function profiles()
+    {
+        return $this->person?->profiles() ?? collect();
+    }
+
+    /**
+     * Verificar si el usuario tiene un rol específico
+     */
+    public function hasRole(string $role): bool
+    {
+        if (!$this->person || !$this->person->profiles) {
+            return false;
+        }
+
+        return $this->person->profiles->contains('profile_type', $role);
+    }
+
+    /**
+     * Verificar si el usuario es administrador
+     */
+    public function isAdmin(): bool
+    {
+        return $this->hasRole('admin');
+    }
+
+    /**
+     * Verificar si el usuario es estudiante
+     */
+    public function isStudent(): bool
+    {
+        return $this->hasRole('student');
+    }
+
+    /**
+     * Verificar si el usuario es docente
+     */
+    public function isTeacher(): bool
+    {
+        return $this->hasRole('teacher');
+    }
+
+    /**
+     * Verificar si el usuario es tutor
+     */
+    public function isTutor(): bool
+    {
+        return $this->hasRole('tutor');
+    }
+
+    /**
+     * Nombre completo del usuario
+     */
+    public function getFullNameAttribute(): string
+    {
+        return $this->person?->full_name ?? $this->name;
     }
 }

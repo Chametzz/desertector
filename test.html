@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Panel de Incidentes Estudiantiles</title>
+    <!-- Tailwind CSS + Font Awesome + Chart.js + Alpine.js -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* personalización extra */
+        .risk-badge-1 {
+            background-color: #dcfce7;
+            color: #15803d;
+        }
+
+        .risk-badge-2 {
+            background-color: #fef9c3;
+            color: #854d0e;
+        }
+
+        .risk-badge-3 {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .transition-smooth {
+            transition: all 0.2s ease;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" x-data="incidentManager()" x-init="init()">
+        <!-- Encabezado -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">📋 Incidentes Estudiantiles</h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Gestión centralizada para profesores y tutores
+                </p>
+            </div>
+            <div class="mt-4 sm:mt-0 flex gap-3">
+                <button @click="toggleDarkMode"
+                    class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                    <i :class="darkMode ? 'fas fa-sun' : 'fas fa-moon'"></i>
+                </button>
+                <button @click="openNewIncidentModal()"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow flex items-center gap-2">
+                    <i class="fas fa-plus"></i> Nuevo Incidente
+                </button>
+            </div>
+        </div>
+
+        <!-- Tarjetas de resumen (estadísticas rápidas) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-4 border-l-4 border-blue-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Total incidentes</p>
+                        <p class="text-2xl font-bold" x-text="totalIncidents"></p>
+                    </div>
+                    <i class="fas fa-clipboard-list text-3xl text-blue-500 opacity-70"></i>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-4 border-l-4 border-yellow-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Riesgo Alto (Nivel 3)</p>
+                        <p class="text-2xl font-bold" x-text="highRiskCount"></p>
+                    </div>
+                    <i class="fas fa-exclamation-triangle text-3xl text-yellow-500 opacity-70"></i>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-4 border-l-4 border-green-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Últimos 7 días</p>
+                        <p class="text-2xl font-bold" x-text="recentIncidents"></p>
+                    </div>
+                    <i class="fas fa-calendar-week text-3xl text-green-500 opacity-70"></i>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-4 border-l-4 border-purple-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Alumnos involucrados</p>
+                        <p class="text-2xl font-bold" x-text="uniqueStudents"></p>
+                    </div>
+                    <i class="fas fa-users text-3xl text-purple-500 opacity-70"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros y búsqueda -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-5 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">🔍 Buscar alumno</label>
+                    <input type="text" x-model="filters.search" placeholder="Nombre o matrícula"
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 p-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">📂 Categoría</label>
+                    <select x-model="filters.category"
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 p-2 text-sm">
+                        <option value="">Todas</option>
+                        <template x-for="cat in categories" :key="cat.id">
+                            <option :value="cat.id" x-text="cat.name"></option>
+                        </template>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">⚠️ Nivel riesgo</label>
+                    <select x-model="filters.risk"
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 p-2 text-sm">
+                        <option value="">Todos</option>
+                        <option value="1">Bajo (1)</option>
+                        <option value="2">Medio (2)</option>
+                        <option value="3">Alto (3)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">📅 Fecha desde / hasta</label>
+                    <div class="flex gap-2">
+                        <input type="date" x-model="filters.dateFrom"
+                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 p-2 text-sm">
+                        <input type="date" x-model="filters.dateTo"
+                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 p-2 text-sm">
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-end mt-4">
+                <button @click="resetFilters"
+                    class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400">Limpiar filtros</button>
+            </div>
+        </div>
+
+        <!-- Gráfico de distribución por riesgo y tabla -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-4 lg:col-span-1">
+                <h3 class="text-md font-semibold mb-3 flex items-center gap-2"><i class="fas fa-chart-bar"></i>
+                    Incidentes por nivel de riesgo</h3>
+                <canvas id="riskChart" width="300" height="200" style="max-width:100%; height:auto;"></canvas>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-4 lg:col-span-2">
+                <h3 class="text-md font-semibold mb-3 flex items-center gap-2"><i class="fas fa-chart-line"></i>
+                    Tendencia mensual</h3>
+                <canvas id="monthlyChart" width="400" height="150" style="max-width:100%; height:auto;"></canvas>
+            </div>
+        </div>
+
+        <!-- Tabla de incidentes -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-900">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Alumno</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Materia</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categoría</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Riesgo</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descripción</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        <template x-for="incident in filteredIncidents" :key="incident.id">
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm" x-text="incident.date_formatted"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium"
+                                    x-text="incident.student_name"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm" x-text="incident.subject_name || '—'">
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm" x-text="incident.category_name"></td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span x-text="incident.risk_label" :class="'risk-badge-'+incident.risk_level"
+                                        class="px-2 py-0.5 rounded-full text-xs font-semibold"></span>
+                                </td>
+                                <td class="px-6 py-4 text-sm max-w-xs truncate" x-text="incident.description"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right">
+                                    <button @click="editIncident(incident)"
+                                        class="text-blue-600 hover:text-blue-800 mr-2"><i
+                                            class="fas fa-edit"></i></button>
+                                    <button @click="deleteIncident(incident.id)"
+                                        class="text-red-600 hover:text-red-800"><i
+                                            class="fas fa-trash-alt"></i></button>
+                                </td>
+                            </tr>
+                        </template>
+                        <tr x-show="filteredIncidents.length === 0">
+                            <td colspan="7" class="text-center py-8 text-gray-500">No se encontraron incidentes con los
+                                filtros actuales.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="px-6 py-3 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                <span class="text-sm text-gray-500">Mostrando <span x-text="filteredIncidents.length"></span> de <span
+                        x-text="incidents.length"></span></span>
+                <div class="flex gap-2">
+                    <button @click="prevPage" :disabled="currentPage === 1"
+                        class="px-3 py-1 border rounded disabled:opacity-50">Anterior</button>
+                    <span class="px-3 py-1">Pág. <span x-text="currentPage"></span> / <span
+                            x-text="totalPages"></span></span>
+                    <button @click="nextPage" :disabled="currentPage === totalPages"
+                        class="px-3 py-1 border rounded disabled:opacity-50">Siguiente</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para nuevo/editar incidente -->
+        <div x-show="modalOpen" x-cloak
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm"
+            style="display: none;">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg mx-4 p-6"
+                @click.away="modalOpen = false">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold" x-text="editingId ? 'Editar incidente' : 'Registrar incidente'"></h3>
+                    <button @click="modalOpen = false" class="text-gray-500 hover:text-gray-700"><i
+                            class="fas fa-times"></i></button>
+                </div>
+                <form @submit.prevent="saveIncident">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Alumno *</label>
+                            <select x-model="form.student_id" required
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 p-2">
+                                <option value="">Seleccionar</option>
+                                <template x-for="stu in students" :key="stu.id">
+                                    <option :value="stu.id" x-text="stu.full_name"></option>
+                                </template>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Materia (opcional)</label>
+                            <select x-model="form.subject_id"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 p-2">
+                                <option value="">-- Ninguna --</option>
+                                <template x-for="sub in subjects" :key="sub.id">
+                                    <option :value="sub.id" x-text="sub.name"></option>
+                                </template>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Categoría *</label>
+                            <select x-model="form.category_id" required
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 p-2">
+                                <option value="">Seleccionar</option>
+                                <template x-for="cat in categories" :key="cat.id">
+                                    <option :value="cat.id" x-text="cat.name"></option>
+                                </template>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Nivel riesgo *</label>
+                            <select x-model="form.risk_level" required
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 p-2">
+                                <option value="1">Bajo (1)</option>
+                                <option value="2">Medio (2)</option>
+                                <option value="3">Alto (3)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Fecha *</label>
+                            <input type="date" x-model="form.date" required
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 p-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Descripción *</label>
+                            <textarea x-model="form.description" rows="3" required
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 p-2"
+                                placeholder="Describe el incidente..."></textarea>
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-3 mt-6">
+                        <button type="button" @click="modalOpen = false"
+                            class="px-4 py-2 border rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">Cancelar</button>
+                        <button type="submit"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function incidentManager() {
+            return {
+                darkMode: false,
+                // Datos simulados (en producción se obtendrían desde API/Livewire)
+                incidents: [],
+                students: [],
+                subjects: [],
+                categories: [],
+                filters: { search: '', category: '', risk: '', dateFrom: '', dateTo: '' },
+                modalOpen: false,
+                editingId: null,
+                form: {
+                    student_id: '',
+                    subject_id: '',
+                    category_id: '',
+                    risk_level: 1,
+                    date: new Date().toISOString().slice(0, 10),
+                    description: ''
+                },
+                currentPage: 1,
+                perPage: 8,
+                riskChart: null,
+                monthlyChart: null,
+
+                async init() {
+                    // Cargar datos de ejemplo (mockup)
+                    await this.loadMockData();
+                    this.applyFilters();
+                    this.renderCharts();
+                },
+
+                async loadMockData() {
+                    // Datos de ejemplo para pruebas
+                    this.students = [
+                        { id: 1, full_name: "María González (2021001)" },
+                        { id: 2, full_name: "Carlos López (2021002)" },
+                        { id: 3, full_name: "Ana Martínez (2021003)" }
+                    ];
+                    this.subjects = [
+                        { id: 1, name: "Matemáticas" },
+                        { id: 2, name: "Literatura" },
+                        { id: 3, name: "Historia" }
+                    ];
+                    this.categories = [
+                        { id: 1, name: "Conducta" },
+                        { id: 2, name: "Bajo rendimiento" },
+                        { id: 3, name: "Falta de respeto" }
+                    ];
+                    this.incidents = [
+                        { id: 1, student_id: 1, subject_id: 1, category_id: 2, risk_level: 2, date: "2025-01-15", description: "No entregó tarea en 3 ocasiones", teacher_id: 1, student_name: "María González", subject_name: "Matemáticas", category_name: "Bajo rendimiento", date_formatted: "15/01/2025", risk_label: "Medio" },
+                        { id: 2, student_id: 2, subject_id: 2, category_id: 1, risk_level: 3, date: "2025-02-10", description: "Interrupción constante y uso de celular", teacher_id: 1, student_name: "Carlos López", subject_name: "Literatura", category_name: "Conducta", date_formatted: "10/02/2025", risk_label: "Alto" },
+                        { id: 3, student_id: 3, subject_id: null, category_id: 3, risk_level: 1, date: "2025-03-05", description: "Comentario inapropiado pero se disculpó", teacher_id: 1, student_name: "Ana Martínez", subject_name: null, category_name: "Falta de respeto", date_formatted: "05/03/2025", risk_label: "Bajo" },
+                        { id: 4, student_id: 1, subject_id: 3, category_id: 2, risk_level: 2, date: "2025-04-20", description: "Proyecto incompleto", teacher_id: 1, student_name: "María González", subject_name: "Historia", category_name: "Bajo rendimiento", date_formatted: "20/04/2025", risk_label: "Medio" },
+                        { id: 5, student_id: 2, subject_id: 1, category_id: 1, risk_level: 2, date: "2025-05-12", description: "No respetó turnos de palabra", teacher_id: 1, student_name: "Carlos López", subject_name: "Matemáticas", category_name: "Conducta", date_formatted: "12/05/2025", risk_label: "Medio" }
+                    ];
+                    // Asegurar que todos los incidentes tengan campos calculados
+                    this.incidents.forEach(inc => {
+                        inc.student_name = this.students.find(s => s.id === inc.student_id)?.full_name || "Desconocido";
+                        inc.subject_name = this.subjects.find(s => s.id === inc.subject_id)?.name || null;
+                        inc.category_name = this.categories.find(c => c.id === inc.category_id)?.name || "Sin categoría";
+                        inc.date_formatted = new Date(inc.date).toLocaleDateString('es-ES');
+                        inc.risk_label = inc.risk_level === 1 ? "Bajo" : (inc.risk_level === 2 ? "Medio" : "Alto");
+                    });
+                },
+
+                toggleDarkMode() {
+                    this.darkMode = !this.darkMode;
+                    if (this.darkMode) document.documentElement.classList.add('dark');
+                    else document.documentElement.classList.remove('dark');
+                },
+
+                get filteredIncidents() {
+                    let result = this.incidents;
+                    if (this.filters.search) {
+                        const term = this.filters.search.toLowerCase();
+                        result = result.filter(i => i.student_name.toLowerCase().includes(term));
+                    }
+                    if (this.filters.category) {
+                        result = result.filter(i => i.category_id == this.filters.category);
+                    }
+                    if (this.filters.risk) {
+                        result = result.filter(i => i.risk_level == this.filters.risk);
+                    }
+                    if (this.filters.dateFrom) {
+                        result = result.filter(i => i.date >= this.filters.dateFrom);
+                    }
+                    if (this.filters.dateTo) {
+                        result = result.filter(i => i.date <= this.filters.dateTo);
+                    }
+                    return result;
+                },
+
+                get paginatedIncidents() {
+                    const start = (this.currentPage - 1) * this.perPage;
+                    return this.filteredIncidents.slice(start, start + this.perPage);
+                },
+
+                get totalPages() {
+                    return Math.ceil(this.filteredIncidents.length / this.perPage);
+                },
+
+                prevPage() { if (this.currentPage > 1) this.currentPage--; },
+                nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; },
+
+                resetFilters() {
+                    this.filters = { search: '', category: '', risk: '', dateFrom: '', dateTo: '' };
+                    this.currentPage = 1;
+                },
+
+                openNewIncidentModal() {
+                    this.editingId = null;
+                    this.form = {
+                        student_id: '',
+                        subject_id: '',
+                        category_id: '',
+                        risk_level: 1,
+                        date: new Date().toISOString().slice(0, 10),
+                        description: ''
+                    };
+                    this.modalOpen = true;
+                },
+
+                editIncident(incident) {
+                    this.editingId = incident.id;
+                    this.form = {
+                        student_id: incident.student_id,
+                        subject_id: incident.subject_id || '',
+                        category_id: incident.category_id,
+                        risk_level: incident.risk_level,
+                        date: incident.date,
+                        description: incident.description
+                    };
+                    this.modalOpen = true;
+                },
+
+                saveIncident() {
+                    // Simular guardado (en producción llamar a API)
+                    if (this.editingId) {
+                        const idx = this.incidents.findIndex(i => i.id === this.editingId);
+                        if (idx !== -1) {
+                            this.incidents[idx] = {
+                                ...this.incidents[idx],
+                                student_id: this.form.student_id,
+                                subject_id: this.form.subject_id || null,
+                                category_id: this.form.category_id,
+                                risk_level: this.form.risk_level,
+                                date: this.form.date,
+                                description: this.form.description,
+                                student_name: this.students.find(s => s.id == this.form.student_id)?.full_name,
+                                subject_name: this.subjects.find(s => s.id == this.form.subject_id)?.name,
+                                category_name: this.categories.find(c => c.id == this.form.category_id)?.name,
+                                date_formatted: new Date(this.form.date).toLocaleDateString('es-ES'),
+                                risk_label: this.form.risk_level == 1 ? "Bajo" : (this.form.risk_level == 2 ? "Medio" : "Alto")
+                            };
+                        }
+                    } else {
+                        const newId = this.incidents.length + 1;
+                        this.incidents.push({
+                            id: newId,
+                            student_id: this.form.student_id,
+                            subject_id: this.form.subject_id || null,
+                            category_id: this.form.category_id,
+                            risk_level: this.form.risk_level,
+                            date: this.form.date,
+                            description: this.form.description,
+                            teacher_id: 1,
+                            student_name: this.students.find(s => s.id == this.form.student_id)?.full_name,
+                            subject_name: this.subjects.find(s => s.id == this.form.subject_id)?.name,
+                            category_name: this.categories.find(c => c.id == this.form.category_id)?.name,
+                            date_formatted: new Date(this.form.date).toLocaleDateString('es-ES'),
+                            risk_label: this.form.risk_level == 1 ? "Bajo" : (this.form.risk_level == 2 ? "Medio" : "Alto")
+                        });
+                    }
+                    this.modalOpen = false;
+                    this.renderCharts();
+                },
+
+                deleteIncident(id) {
+                    if (confirm("¿Eliminar este incidente?")) {
+                        this.incidents = this.incidents.filter(i => i.id !== id);
+                        this.renderCharts();
+                    }
+                },
+
+                // Métodos para estadísticas
+                get totalIncidents() { return this.incidents.length; },
+                get highRiskCount() { return this.incidents.filter(i => i.risk_level === 3).length; },
+                get recentIncidents() { const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate() - 7); return this.incidents.filter(i => new Date(i.date) >= weekAgo).length; },
+                get uniqueStudents() { return new Set(this.incidents.map(i => i.student_id)).size; },
+
+                renderCharts() {
+                    // Contar por nivel de riesgo
+                    const riskCounts = [0, 0, 0];
+                    this.incidents.forEach(inc => { if (inc.risk_level >= 1 && inc.risk_level <= 3) riskCounts[inc.risk_level - 1]++; });
+                    if (this.riskChart) this.riskChart.destroy();
+                    const ctxRisk = document.getElementById('riskChart').getContext('2d');
+                    this.riskChart = new Chart(ctxRisk, {
+                        type: 'doughnut',
+                        data: { labels: ['Bajo (1)', 'Medio (2)', 'Alto (3)'], datasets: [{ data: riskCounts, backgroundColor: ['#10b981', '#f59e0b', '#ef4444'] }] },
+                        options: { responsive: true, maintainAspectRatio: true }
+                    });
+                    // Tendencia mensual (simplificado)
+                    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+                    const monthly = Array(12).fill(0);
+                    this.incidents.forEach(inc => { const m = new Date(inc.date).getMonth(); monthly[m]++; });
+                    if (this.monthlyChart) this.monthlyChart.destroy();
+                    const ctxMonth = document.getElementById('monthlyChart').getContext('2d');
+                    this.monthlyChart = new Chart(ctxMonth, { type: 'line', data: { labels: months, datasets: [{ label: 'Incidentes', data: monthly, borderColor: '#3b82f6', tension: 0.2 }] } });
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

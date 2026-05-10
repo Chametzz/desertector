@@ -9,20 +9,15 @@ class StudentObservation extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['student_id', 'teacher_id', 'tutor_id', 'description'];
+    protected $fillable = ['student_id', 'reporter_id', 'description'];
 
     public function student()
     {
         return $this->belongsTo(Student::class);
     }
 
-    public function teacher()
+    public function reporter()
     {
-        return $this->belongsTo(Teacher::class);
-    }
-
-    public function tutor()
-    {
-        return $this->belongsTo(Tutor::class);
+        return $this->belongsTo(Person::class);
     }
 }

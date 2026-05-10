@@ -14,8 +14,7 @@ return new class extends Migration
         Schema::create('student_incidents', function (Blueprint $table) {
             $table->id();
             $table->foreignId('student_id')->constrained();
-            $table->foreignId('teacher_id')->nullable()->constrained();
-            $table->foreignId('tutor_id')->nullable()->constrained();
+            $table->foreignId('reporter_id')->constrained('people');
             $table->foreignId('subject_id')->nullable()->constrained();
             $table->foreignId('category_id')->nullable()->constrained('incident_categories');
             $table->integer('risk_level')->unsigned()->between(1, 3);

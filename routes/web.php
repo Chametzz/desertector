@@ -1,7 +1,14 @@
 <?php
 
+use App\Http\Controllers\IncidentCategoryController;
+use App\Http\Controllers\StudentAbsenceController;
+use App\Http\Controllers\StudentIncidentController;
+use App\Http\Controllers\StudentObservationController;
+use App\Http\Controllers\StudentSupportController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\UserController;
+use App\Models\StudentAbsence;
+use App\Models\StudentIncident;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Blade; // Importante para que funcione el render
 
@@ -25,6 +32,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/majors/{major}', [App\Http\Controllers\MajorController::class, 'destroy'])->name('majors.destroy');
 
     Route::resource('users', UserController::class);
+
+    Route::resource('incident_categories', IncidentCategoryController::class);
+
+    Route::resource('student_absences', StudentAbsenceController::class)->except(['show']);
+    Route::get('student_absences/events', [StudentAbsenceController::class, 'getEvents'])->name('absences.events');
+    Route::get('student_absences/search-students', [StudentAbsenceController::class, 'searchStudents'])->name('absences.search-students');
+
+    Route::resource('student_incidents', StudentIncidentController::class);
+
+    Route::resource('student_observations', StudentObservationController::class);
+
+    Route::resource('student_supports', StudentSupportController::class);
 });
+
 
 require __DIR__ . '/settings.php';

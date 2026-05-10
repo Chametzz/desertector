@@ -13,58 +13,46 @@
         </flux:sidebar.header>
 
         <flux:sidebar.nav>
-            <flux:sidebar.group :heading="__('Platform')" class="grid">
+            <flux:sidebar.group class="grid">
                 <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
                     wire:navigate>
-                    {{ __('Dashboard') }}
+                    Inicio
+                </flux:sidebar.item>
+                <flux:sidebar.item icon="book-open" :href="route('subjects.index')"
+                    :current="request()->routeIs('subjects.*')" wire:navigate>
+                    Materias
+                </flux:sidebar.item>
+                <flux:sidebar.item icon="academic-cap" :href="route('majors.index')"
+                    :current="request()->routeIs('majors.*')" wire:navigate>
+                    Carreras
+                </flux:sidebar.item>
+                <flux:sidebar.item icon="user" :href="route('users.index')" :current="request()->routeIs('users.*')"
+                    wire:navigate>
+                    Usuarios
+                </flux:sidebar.item>
+                <flux:sidebar.item icon="calendar-days" :href="route('student_absences.index')"
+                    :current="request()->routeIs('student_absences.*')" wire:navigate>
+                    Inacistencias
+                </flux:sidebar.item>
+                <flux:sidebar.item icon="squares-2x2" :href="route('incident_categories.index')"
+                    :current="request()->routeIs('incident_categories.*')" wire:navigate>
+                    Categorías de Incidentes
+                </flux:sidebar.item>
+                <flux:sidebar.item icon="exclamation-triangle" :href="route('student_incidents.index')"
+                    :current="request()->routeIs('incidents.*')" wire:navigate>
+                    Incidentes
+                </flux:sidebar.item>
+                <flux:sidebar.item icon="eye" :href="route('student_observations.index')"
+                    :current="request()->routeIs('student_observations.*')" wire:navigate>
+                    Observaciones
+                </flux:sidebar.item>
+                <flux:sidebar.item icon="hand-raised" :href="route('student_supports.index')"
+                    :current="request()->routeIs('student_supports.*')" wire:navigate>
+                    Apoyos
                 </flux:sidebar.item>
             </flux:sidebar.group>
-
-            <!-- SECCIÓN DE ADMINISTRADOR -->
-            <flux:navlist.group heading="Administrador">
-                <flux:navlist.item icon="book-open" href="{{ route('subjects.index') }}">Materias</flux:navlist.item>
-                <flux:navlist.item icon="academic-cap" href="{{ route('majors.index') }}">Carreras</flux:navlist.item>
-                <flux:navlist.item icon="user" href=" {{ route('users.index') }}">Usuarios</flux:navlist.item>
-                <flux:navlist.item icon="academic-cap" href="#">Mis Calificaciones</flux:navlist.item>
-            </flux:navlist.group>
-
-            <!-- SECCIÓN DE ESTUDIANTE -->
-            <flux:navlist.group heading="Estudiante">
-                <flux:navlist.item icon="home" href="{{ route('dashboard') }}">Inicio App</flux:navlist.item>
-                <flux:navlist.item icon="clipboard-document-check" href="#">Mis Cuestionarios</flux:navlist.item>
-                <flux:navlist.item icon="academic-cap" href="#">Mis Calificaciones</flux:navlist.item>
-            </flux:navlist.group>
-
-            <!-- SECCIÓN DE DOCENTE -->
-            <flux:navlist.group heading="Docente">
-                <flux:navlist.item icon="home" href="{{ route('dashboard') }}">Inicio App</flux:navlist.item>
-                <flux:navlist.item icon="clipboard-document-check" href="#">Mis Cuestionarios</flux:navlist.item>
-                <flux:navlist.item icon="academic-cap" href="#">Mis Calificaciones</flux:navlist.item>
-            </flux:navlist.group>
-
-            <!-- SECCIÓN DE TUTOR -->
-            <flux:navlist.group heading="Tutor">
-                <flux:navlist.item icon="home" href="{{ route('dashboard') }}">Inicio App</flux:navlist.item>
-                <flux:navlist.item icon="clipboard-document-check" href="#">Mis Cuestionarios</flux:navlist.item>
-                <flux:navlist.item icon="academic-cap" href="#">Mis Calificaciones</flux:navlist.item>
-            </flux:navlist.group>
-
         </flux:sidebar.nav>
-
-        <flux:spacer />
-
-        <flux:sidebar.nav>
-            <flux:sidebar.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit"
-                target="_blank">
-                {{ __('Repository') }}
-            </flux:sidebar.item>
-
-            <flux:sidebar.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire"
-                target="_blank">
-                {{ __('Documentation') }}
-            </flux:sidebar.item>
-        </flux:sidebar.nav>
-
+        <flux:sidebar.spacer />
         <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
     </flux:sidebar>
 

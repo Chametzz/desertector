@@ -166,8 +166,7 @@ Incidentes disciplinarios o académicos.
 |-------|------|--------|-------------|
 | `id` | INT | -- | Identificador autoincrementable (PK) |
 | `student_id` | INT (FK) | -- | Estudiante involucrado (`students.id`) |
-| `teacher_id` | INT (FK) | -- (nullable) | Docente que reporta (`teachers.id`) |
-| `tutor_id` | INT (FK) | -- (nullable) | Tutor que reporta (`tutors.id`) |
+| `reporter_id` | INT (FK) | -- | Persona que reporta (`people.id`) |
 | `subject_id` | INT (FK) | -- (nullable) | Materia opcional (`subjects.id`) |
 | `category_id` | INT (FK) | -- (nullable) | Categoría (`incident_categories.id`) |
 | `risk_level` | INT | 1 – 3 | Nivel de riesgo |
@@ -178,8 +177,7 @@ Incidentes disciplinarios o académicos.
 
 **FK**:
 - `student_id` → `students(id)`
-- `teacher_id` → `teachers(id)`
-- `tutor_id` → `tutors(id)`
+- `reporter_id` → `people(id)`
 - `subject_id` → `subjects(id)`
 - `category_id` → `incident_categories(id)`
 
@@ -192,16 +190,14 @@ Observaciones cualitativas de docentes o tutores.
 |-------|------|--------|-------------|
 | `id` | INT | -- | Identificador autoincrementable (PK) |
 | `student_id` | INT (FK) | -- | Estudiante observado (`students.id`) |
-| `teacher_id` | INT (FK) | -- (nullable) | Docente que escribe (`teachers.id`) |
-| `tutor_id` | INT (FK) | -- (nullable) | Tutor que escribe (`tutors.id`) |
+| `reporter_id` | INT (FK) | -- | Persona que reporta (`people.id`) |
 | `description` | TEXT | -- | Descripción de la observación |
 | `created_at` | TIMESTAMP | -- | Fecha de registro |
 | `updated_at` | TIMESTAMP | -- | Fecha de actualización |
 
 **FK**:
 - `student_id` → `students(id)`
-- `teacher_id` → `teachers(id)`
-- `tutor_id` → `tutors(id)`
+- `reporter_id` → `people(id)`
 
 ---
 
@@ -303,7 +299,7 @@ Relación muchos a muchos entre asignaciones de encuesta y personas.
 | `person_id` | INT (FK) | -- | Persona asignada (`people.id`) |
 
 **FK**:
-- `survey_assignments_id` → `survey_assignments(id)`
+- `survey_assignment_id` → `survey_assignments(id)`
 - `person_id` → `people(id)`
 
 ---
@@ -314,7 +310,7 @@ Registro de cada intento de respuesta a una asignación de encuesta.
 | Campo | Tipo | Límite | Descripción |
 |-------|------|--------|-------------|
 | `id` | INT | -- | Identificador autoincrementable (PK) |
-| `survey_assignments_id` | INT (FK) | -- | Asignación respondida (`survey_assignments.id`) |
+| `survey_assignment_id` | INT (FK) | -- | Asignación respondida (`survey_assignments.id`) |
 | `person_id` | INT (FK) | -- | Persona que responde (`people.id`) |
 | `attempt_number` | INT | -- | Número de intento (1,2,…) |
 | `completed_at` | TIMESTAMP | -- (nullable) | Momento de finalización |
@@ -322,7 +318,7 @@ Registro de cada intento de respuesta a una asignación de encuesta.
 | `updated_at` | TIMESTAMP | -- | Fecha de actualización |
 
 **FK**:
-- `survey_assignments_id` → `survey_assignments(id)`
+- `survey_assignment_id` → `survey_assignments(id)`
 - `person_id` → `people(id)`
 
 ---
@@ -434,8 +430,7 @@ erDiagram
     student_incidents {
         int id PK
         int student_id FK
-        int teacher_id FK
-        int tutor_id FK
+        int reporter_id FK
         int subject_id FK
         int category_id FK
         int risk_level
@@ -447,8 +442,7 @@ erDiagram
     student_observations {
         int id PK
         int student_id FK
-        int teacher_id FK
-        int tutor_id FK
+        int reporter_id FK
         text description
         timestamp created_at
         timestamp updated_at
@@ -506,7 +500,7 @@ erDiagram
     }
     survey_responses {
         int id PK
-        int survey_assignments_id FK
+        int survey_assignment_id FK
         int person_id FK
         int attempt_number
         timestamp completed_at
@@ -536,13 +530,11 @@ erDiagram
     teachers ||--o{ student_absences : "reporta"
     subjects ||--o{ student_absences : "motiva"
     students ||--o{ student_incidents : "involucra"
-    teachers ||--o{ student_incidents : "reporta (opc)"
-    tutors ||--o{ student_incidents : "reporta (opc)"
-    subjects ||--o{ student_incidents : "relaciona (opc)"
+    people ||--o{ student_incidents : "reporta (reporter_id)"
+    subjects ||--o{ student_incidents : "relaciona (opcional)"
     incident_categories ||--o{ student_incidents : "clasifica"
     students ||--o{ student_observations : "tiene"
-    teachers ||--o{ student_observations : "escribe (opc)"
-    tutors ||--o{ student_observations : "escribe (opc)"
+    people ||--o{ student_observations : "escribe (reporter_id)"
     students ||--o{ student_supports : "recibe"
     tutors ||--o{ student_supports : "ejecuta"
     people ||--o{ surveys : "crea (created_by)"
@@ -550,10 +542,9 @@ erDiagram
     survey_questions ||--o{ question_options : "ofrece"
     surveys ||--o{ survey_assignments : "asigna"
     survey_assignments ||--o{ survey_assignment_people : "tiene"
-    students ||--o{ survey_assignment_people : "recibe"
+    people ||--o{ survey_assignment_people : "recibe (person_id)"
     survey_assignments ||--o{ survey_responses : "genera"
     people ||--o{ survey_responses : "responde"
     survey_responses ||--o{ survey_answers : "detalla"
     survey_questions ||--o{ survey_answers : "contesta"
-    question_options ||--o{ survey_answers : "opcion_elegida (opc)"
-```
+    question_options ||--o{ survey_answers : "opcion_elegida (opcional)"

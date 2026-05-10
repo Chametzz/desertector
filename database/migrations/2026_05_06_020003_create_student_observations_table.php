@@ -14,8 +14,7 @@ return new class extends Migration
         Schema::create('student_observations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('student_id')->constrained();
-            $table->foreignId('teacher_id')->nullable()->constrained();
-            $table->foreignId('tutor_id')->nullable()->constrained();
+            $table->foreignId('reporter_id')->constrained('people');
             $table->text('description');
             $table->timestamps();
         });

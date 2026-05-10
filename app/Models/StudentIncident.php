@@ -11,8 +11,7 @@ class StudentIncident extends Model
 
     protected $fillable = [
         'student_id',
-        'teacher_id',
-        'tutor_id',
+        'reporter_id',
         'subject_id',
         'category_id',
         'risk_level',
@@ -30,14 +29,9 @@ class StudentIncident extends Model
         return $this->belongsTo(Student::class);
     }
 
-    public function teacher()
+    public function reporter()
     {
-        return $this->belongsTo(Teacher::class);
-    }
-
-    public function tutor()
-    {
-        return $this->belongsTo(Tutor::class);
+        return $this->belongsTo(Person::class);
     }
 
     public function subject()
