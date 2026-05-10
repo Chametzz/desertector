@@ -36,7 +36,7 @@
                             <flux:table.cell align="center">
                                 {{ $observation->student->person->full_name }}
                             </flux:table.cell>
-                            <flux:table.cell align="center" class="max-w-md truncate">
+                            <flux:table.cell align="center" class="whitespace-normal wrap-break-word min-w-50">
                                 {{ $observation->description }}
                             </flux:table.cell>
                             <flux:table.cell align="center">

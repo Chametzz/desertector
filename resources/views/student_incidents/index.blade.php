@@ -56,7 +56,7 @@
                                     {{ $riskData['label'] }}
                                 </flux:badge>
                             </flux:table.cell>
-                            <flux:table.cell align="center">
+                            <flux:table.cell align="center" class="whitespace-normal wrap-break-word min-w-50">
                                 {{ $student_incident->description }}
                             </flux:table.cell>
                             <flux:table.cell align="center">

@@ -1,3 +1,7 @@
+@php
+    $user = Auth::user();
+@endphp
+
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
 
@@ -18,38 +22,54 @@
                     wire:navigate>
                     Inicio
                 </flux:sidebar.item>
-                <flux:sidebar.item icon="book-open" :href="route('subjects.index')"
-                    :current="request()->routeIs('subjects.*')" wire:navigate>
-                    Materias
-                </flux:sidebar.item>
-                <flux:sidebar.item icon="academic-cap" :href="route('majors.index')"
-                    :current="request()->routeIs('majors.*')" wire:navigate>
-                    Carreras
-                </flux:sidebar.item>
-                <flux:sidebar.item icon="user" :href="route('users.index')" :current="request()->routeIs('users.*')"
-                    wire:navigate>
-                    Usuarios
-                </flux:sidebar.item>
-                <flux:sidebar.item icon="calendar-days" :href="route('student_absences.index')"
-                    :current="request()->routeIs('student_absences.*')" wire:navigate>
-                    Inacistencias
-                </flux:sidebar.item>
-                <flux:sidebar.item icon="squares-2x2" :href="route('incident_categories.index')"
-                    :current="request()->routeIs('incident_categories.*')" wire:navigate>
-                    Categorías de Incidentes
-                </flux:sidebar.item>
-                <flux:sidebar.item icon="exclamation-triangle" :href="route('student_incidents.index')"
-                    :current="request()->routeIs('incidents.*')" wire:navigate>
-                    Incidentes
-                </flux:sidebar.item>
-                <flux:sidebar.item icon="eye" :href="route('student_observations.index')"
-                    :current="request()->routeIs('student_observations.*')" wire:navigate>
-                    Observaciones
-                </flux:sidebar.item>
-                <flux:sidebar.item icon="hand-raised" :href="route('student_supports.index')"
-                    :current="request()->routeIs('student_supports.*')" wire:navigate>
-                    Apoyos
-                </flux:sidebar.item>
+                @if ($user->isAdmin())
+                    <flux:sidebar.item icon="book-open" :href="route('subjects.index')"
+                        :current="request()->routeIs('subjects.*')" wire:navigate>
+                        Materias
+                    </flux:sidebar.item>
+                @endif
+                @if ($user->isAdmin())
+                    <flux:sidebar.item icon="academic-cap" :href="route('majors.index')"
+                        :current="request()->routeIs('majors.*')" wire:navigate>
+                        Carreras
+                    </flux:sidebar.item>
+                @endif
+                @if ($user->isAdmin())
+                    <flux:sidebar.item icon="user" :href="route('users.index')"
+                        :current="request()->routeIs('users.*')" wire:navigate>
+                        Usuarios
+                    </flux:sidebar.item>
+                @endif
+                @if ($user->isAdmin() || $user->isTutor() || $user->isTeacher())
+                    <flux:sidebar.item icon="calendar-days" :href="route('student_absences.index')"
+                        :current="request()->routeIs('student_absences.*')" wire:navigate>
+                        Inacistencias
+                    </flux:sidebar.item>
+                @endif
+                @if ($user->isAdmin() || $user->isTutor() || $user->isTeacher())
+                    <flux:sidebar.item icon="squares-2x2" :href="route('incident_categories.index')"
+                        :current="request()->routeIs('incident_categories.*')" wire:navigate>
+                        Categorías de Incidentes
+                    </flux:sidebar.item>
+                @endif
+                @if ($user->isAdmin() || $user->isTutor() || $user->isTeacher())
+                    <flux:sidebar.item icon="exclamation-triangle" :href="route('student_incidents.index')"
+                        :current="request()->routeIs('incidents.*')" wire:navigate>
+                        Incidentes
+                    </flux:sidebar.item>
+                @endif
+                @if ($user->isAdmin() || $user->isTutor() || $user->isTeacher())
+                    <flux:sidebar.item icon="eye" :href="route('student_observations.index')"
+                        :current="request()->routeIs('student_observations.*')" wire:navigate>
+                        Observaciones
+                    </flux:sidebar.item>
+                @endif
+                @if ($user->isAdmin() || $user->isTutor())
+                    <flux:sidebar.item icon="hand-raised" :href="route('student_supports.index')"
+                        :current="request()->routeIs('student_supports.*')" wire:navigate>
+                        Apoyos
+                    </flux:sidebar.item>
+                @endif
             </flux:sidebar.group>
         </flux:sidebar.nav>
         <flux:sidebar.spacer />

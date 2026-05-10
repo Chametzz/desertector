@@ -13,7 +13,6 @@ use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
@@ -51,9 +50,7 @@ class User extends Authenticatable
      */
     public function person(): HasOne
     {
-        // Esto le dice a Laravel que busque en la tabla 'people'
-        // un campo 'user_id' que coincida con el ID de este usuario.
-        return $this->hasOne(Person::class);
+        return $this->hasOne(Person::class, 'user_id');
     }
 
     /**
@@ -81,11 +78,11 @@ class User extends Authenticatable
     }
 
     /**
-     * Obtener todos los perfiles de la persona
+     * Obtener todos los perfiles de la persona (como colección)
      */
     public function profiles()
     {
-        return $this->person?->profiles() ?? collect();
+        return $this->person?->personProfiles ?? collect();
     }
 
     /**
@@ -93,11 +90,12 @@ class User extends Authenticatable
      */
     public function hasRole(string $role): bool
     {
-        if (!$this->person || !$this->person->profiles) {
+        if (!$this->person) {
             return false;
         }
 
-        return $this->person->profiles->contains('profile_type', $role);
+        // Verificar si la relación existe y si el perfil está presente
+        return $this->person->personProfiles->contains('profile_type', $role);
     }
 
     /**

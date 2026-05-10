@@ -39,7 +39,7 @@
                             <flux:table.cell align="center">
                                 {{ $support->action_taken }}
                             </flux:table.cell>
-                            <flux:table.cell align="center" class="max-w-md truncate">
+                            <flux:table.cell align="center" class="whitespace-normal wrap-break-word min-w-50">
                                 {{ $support->description }}
                             </flux:table.cell>
                             <flux:table.cell align="center">
