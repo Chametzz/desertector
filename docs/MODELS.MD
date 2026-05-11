@@ -2,17 +2,6 @@
 
 ## Tablas y descripción de campos
 
-### 1. `users`
-Almacena las credenciales de acceso al sistema.
-
-| Campo | Tipo | Límite | Descripción |
-|-------|------|--------|-------------|
-| `id` | INT | -- | Identificador autoincrementable (PK) |
-| `email` | VARCHAR(100) | 100 | Correo institucional, formato único |
-| `password_hash` | VARCHAR(255) | 255 | Contraseña cifrada |
-
----
-
 ### 2. `subjects`
 Materias o asignaturas.
 

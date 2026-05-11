@@ -17,15 +17,15 @@ class StudentAbsenceController extends Controller
         $subjects = collect();
         $students = collect();
 
-        if ($user->isTeacher()) {
+        /*if ($user->isTeacher()) {
             // Profesor: materias que imparte (puedes obtener de relación teacher->subjects)
-            $subjects = Subject::whereHas('teachers', fn($q) => $q->where('teacher_id', $user->teacher->id))->get();
+            // $subjects = Subject::whereHas('teachers', fn($q) => $q->where('teacher_id', $user->teacher->id))->get();
             // Si no hay relación directa, podrías usar todas las materias donde ha reportado ausencias
-            // $subjects = Subject::whereIn('id', StudentAbsence::where('teacher_id', $user->teacher->id)->pluck('subject_id'))->get();
+            $subjects = Subject::whereIn('id', StudentAbsence::where('teacher_id', $user->teacher->id)->pluck('subject_id'))->get();
         } elseif ($user->isTutor()) {
             // Tutor: obtiene sus estudiantes asignados
             $students = Student::where('tutor_id', $user->tutor->id)->get();
-        }
+        }*/
 
         return view('student_absences.index', compact('subjects', 'students'));
     }

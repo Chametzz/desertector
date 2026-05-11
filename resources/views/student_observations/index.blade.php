@@ -1,4 +1,4 @@
-<x-layouts::app title="Observaciones de estudiantes">
+<x-layouts::app :title="__('Observaciones de estudiantes')">
     <div class="flex flex-col gap-6">
         <header class="flex items-center justify-between">
             <div>

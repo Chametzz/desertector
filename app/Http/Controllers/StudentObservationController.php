@@ -11,9 +11,32 @@ class StudentObservationController extends Controller
 {
     public function index()
     {
-        $observations = StudentObservation::with(['student.person', 'reporter'])
-            ->latest('created_at')
-            ->paginate(15);
+        $user = Auth::user();
+        $query = StudentObservation::with(['student.person', 'reporter'])->latest('created_at');
+
+        if ($user->isTeacher()) {
+            // Docente: solo sus propias observaciones (reporter_id = su person_id)
+            $personId = $user->person?->id;
+            if ($personId) {
+                $query->where('reporter_id', $personId);
+            } else {
+                // Si no tiene persona asociada, no mostrará nada (o puedes lanzar excepción)
+                $query->whereRaw('0');
+            }
+        } elseif ($user->isTutor()) {
+            // Tutor: observaciones de los estudiantes que tiene asignados
+            $tutor = $user->person?->tutor;
+            if ($tutor) {
+                // Obtener IDs de estudiantes asignados a este tutor
+                $studentIds = Student::where('tutor_id', $tutor->id)->pluck('id');
+                $query->whereIn('student_id', $studentIds);
+            } else {
+                $query->whereRaw('0');
+            }
+        }
+        // Si el usuario es administrador (u otro rol), puede ver todo (sin filtro adicional)
+
+        $observations = $query->paginate(15);
         return view('student_observations.index', compact('observations'));
     }
 

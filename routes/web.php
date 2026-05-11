@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\IncidentCategoryController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StudentAbsenceController;
 use App\Http\Controllers\StudentIncidentController;
 use App\Http\Controllers\StudentObservationController;
@@ -12,11 +13,12 @@ use App\Models\StudentIncident;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Blade; // Importante para que funcione el render
 
-Route::view('/', 'welcome')->name('home');
+Route::get('/', function () {
+    return redirect()->route('profile.show');
+})->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
-
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::get('/subjects', [SubjectController::class, 'index'])->name('subjects.index');
     Route::get('/subjects/create', [SubjectController::class, 'create'])->name('subjects.create');
     Route::post('/subjects', [SubjectController::class, 'store'])->name('subjects.store');
@@ -44,6 +46,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('student_observations', StudentObservationController::class);
 
     Route::resource('student_supports', StudentSupportController::class);
+
+    Route::get('/analysis', [App\Http\Controllers\AnalysisController::class, 'index'])->name('analysis.index');
 });
 
 

@@ -13,9 +13,32 @@ class StudentIncidentController extends Controller
 {
     public function index()
     {
-        $student_incidents = StudentIncident::with(['student.person', 'reporter', 'subject', 'category'])
-            ->latest('date')
-            ->paginate(15);
+        $user = Auth::user();
+        $query = StudentIncident::with(['student.person', 'reporter', 'subject', 'category'])
+            ->latest('date');
+
+        if ($user->isTeacher()) {
+            // Docente: solo incidentes que él mismo reportó
+            $personId = $user->person?->id;
+            if ($personId) {
+                $query->where('reporter_id', $personId);
+            } else {
+                $query->whereRaw('0');
+            }
+        } elseif ($user->isTutor()) {
+            // Tutor: incidentes de los estudiantes que tiene asignados
+            $tutor = $user->person?->tutor;
+            if ($tutor) {
+                $query->whereHas('student', function ($q) use ($tutor) {
+                    $q->where('tutor_id', $tutor->id);
+                });
+            } else {
+                $query->whereRaw('0');
+            }
+        }
+        // Si es administrador u otro rol, no se aplica filtro adicional
+
+        $student_incidents = $query->paginate(15);
         return view('student_incidents.index', compact('student_incidents'));
     }
 
@@ -38,7 +61,6 @@ class StudentIncidentController extends Controller
             'date'         => 'required|date',
         ]);
 
-        // reporter_id se asigna automáticamente de la persona autenticada
         $person = Auth::user()->person;
         if (!$person) {
             return redirect()->back()->with('error', 'No se encontró tu perfil de persona.');
@@ -53,6 +75,7 @@ class StudentIncidentController extends Controller
 
     public function edit(StudentIncident $student_incident)
     {
+        // Verificar permisos adicionales si se desea (opcional)
         $students = Student::with('person')->get();
         $subjects = Subject::all();
         $categories = IncidentCategory::all();

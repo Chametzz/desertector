@@ -13,13 +13,13 @@
     <flux:sidebar sticky collapsible="mobile"
         class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
         <flux:sidebar.header>
-            <h1 class="text-lg font-semibold tracking-tight">Desertector</h1>
+            <x-app-logo sidebar class="mx-auto" />
         </flux:sidebar.header>
 
         <flux:sidebar.nav>
             <flux:sidebar.group class="grid">
-                <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
-                    wire:navigate>
+                <flux:sidebar.item icon="home" :href="route('profile.show')"
+                    :current="request()->routeIs('profile.show')" wire:navigate>
                     Inicio
                 </flux:sidebar.item>
                 @if ($user->isAdmin())
@@ -46,7 +46,7 @@
                         Inacistencias
                     </flux:sidebar.item>
                 @endif
-                @if ($user->isAdmin() || $user->isTutor() || $user->isTeacher())
+                @if ($user->isAdmin())
                     <flux:sidebar.item icon="squares-2x2" :href="route('incident_categories.index')"
                         :current="request()->routeIs('incident_categories.*')" wire:navigate>
                         Categorías de Incidentes
@@ -68,6 +68,12 @@
                     <flux:sidebar.item icon="hand-raised" :href="route('student_supports.index')"
                         :current="request()->routeIs('student_supports.*')" wire:navigate>
                         Apoyos
+                    </flux:sidebar.item>
+                @endif
+                @if ($user->isAdmin() || $user->isTutor())
+                    <flux:sidebar.item icon="chart-bar" :href="route('analysis.index')"
+                        :current="request()->routeIs('analysis.*')" wire:navigate>
+                        Análisis
                     </flux:sidebar.item>
                 @endif
             </flux:sidebar.group>
@@ -101,19 +107,11 @@
 
                 <flux:menu.separator />
 
-                <flux:menu.radio.group>
-                    <flux:menu.item :href="route('profile.edit')" icon="cog" wire:navigate>
-                        {{ __('Settings') }}
-                    </flux:menu.item>
-                </flux:menu.radio.group>
-
-                <flux:menu.separator />
-
                 <form method="POST" action="{{ route('logout') }}" class="w-full">
                     @csrf
                     <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle"
                         class="w-full cursor-pointer" data-test="logout-button">
-                        {{ __('Log out') }}
+                        {{ __('Cerrar sesión') }}
                     </flux:menu.item>
                 </form>
             </flux:menu>
